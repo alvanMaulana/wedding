@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="robots" content="noindex" />
+  <title>Admin · Undangan Indy &amp; Alvan</title>
+  <style>
+    :root { --gold:#C9A876; --text:#5C4B3A; --text2:#8A7A6A; --cream:#FAF3E9; --blue:#9CC6DC; --pink:#E8B4BE; }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: system-ui, sans-serif; background: var(--cream); color: var(--text); padding: 1.5rem; line-height: 1.5; }
+    h1 { font-size: 1.4rem; margin-bottom: 1rem; }
+    h2 { font-size: 1.1rem; margin: 2rem 0 0.6rem; color: var(--gold); }
+    .gate { max-width: 20rem; margin: 4rem auto; text-align: center; }
+    .gate input { width: 100%; padding: 0.7rem; border: 1px solid #ccc; border-radius: 8px; margin: 0.8rem 0; }
+    .gate button, .refresh { background: var(--gold); color: #fff; border: none; padding: 0.7rem 1.4rem; border-radius: 8px; cursor: pointer; }
+    .wrap { max-width: 900px; margin: 0 auto; }
+    .cards { display: flex; gap: 0.8rem; flex-wrap: wrap; margin-bottom: 1rem; }
+    .card { flex: 1; min-width: 120px; background: #fff; border-radius: 12px; padding: 1rem; text-align: center; box-shadow: 0 4px 12px rgba(92,75,58,0.1); }
+    .card .n { font-size: 1.8rem; font-weight: 700; color: var(--gold); }
+    .card .l { font-size: 0.75rem; color: var(--text2); text-transform: uppercase; letter-spacing: 0.05em; }
+    table { width: 100%; border-collapse: collapse; background: #fff; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 12px rgba(92,75,58,0.1); font-size: 0.88rem; }
+    th, td { padding: 0.6rem 0.8rem; text-align: left; border-bottom: 1px solid #f0e8db; }
+    th { background: #f3e8d8; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.04em; color: var(--text2); }
+    tr:last-child td { border-bottom: none; }
+    .tag { padding: 0.15rem 0.6rem; border-radius: 999px; font-size: 0.72rem; font-weight: 600; }
+    .tag.hadir { background: #dff0e3; color: #3d7a51; }
+    .tag.tidak { background: #f6e0e0; color: #a85555; }
+    .muted { color: var(--text2); font-size: 0.8rem; }
+    .table-scroll { overflow-x: auto; }
+    .hidden { display: none; }
+    .topbar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem; }
+  </style>
+</head>
+<body>
+  <!-- Gate -->
+  <div class="gate" id="gate">
+    <h1>Admin Undangan</h1>
+    <p class="muted">Masukkan kata sandi untuk melihat data.</p>
+    <input type="password" id="pw" placeholder="Kata sandi" autocomplete="off" />
+    <button id="enter">Masuk</button>
+    <p class="muted" id="gate-msg" style="color:#a85555; margin-top:0.5rem;"></p>
+  </div>
+
+  <!-- Dashboard -->
+  <div class="wrap hidden" id="dash">
+    <div class="topbar">
+      <h1>Dashboard Undangan Indy &amp; Alvan</h1>
+      <button class="refresh" id="refresh">↻ Muat ulang</button>
+    </div>
+
+    <div class="cards" id="summary"></div>
+
+    <h2>RSVP</h2>
+    <div class="table-scroll">
+      <table id="rsvp-table">
+        <thead><tr><th>#</th><th>Nama</th><th>Kehadiran</th><th>Jumlah</th><th>Waktu</th></tr></thead>
+        <tbody></tbody>
+      </table>
+    </div>
+
+    <h2>Ucapan &amp; Doa</h2>
+    <div class="table-scroll">
+      <table id="wishes-table">
+        <thead><tr><th>#</th><th>Nama</th><th>Pesan</th><th>Waktu</th></tr></thead>
+        <tbody></tbody>
+      </table>
+    </div>
+  </div>
+
+  <script>
+    // ponytail: client-side password gate only (versi awal). Ganti ke auth server jika data sensitif.
+    const PASSWORD = 'indyalvan2026';
+
+    const gate = document.getElementById('gate');
+    const dash = document.getElementById('dash');
+    const pw = document.getElementById('pw');
+
+    function esc(s){ const d=document.createElement('div'); d.textContent=s; return d.innerHTML; }
+    function fmt(iso){ const d=new Date(iso.replace(' ','T')+'Z'); return d.toLocaleString('id-ID',{dateStyle:'medium',timeStyle:'short'}); }
+
+    async function loadData() {
+      const [rRes, wRes] = await Promise.all([fetch('/api/rsvp'), fetch('/api/wishes?limit=200')]);
+      const r = await rRes.json();
+      const w = await wRes.json();
+
+      const s = r.summary || {};
+      document.getElementById('summary').innerHTML = `
+        <div class="card"><div class="n">${s.hadir||0}</div><div class="l">Hadir</div></div>
+        <div class="card"><div class="n">${s.tidak_hadir||0}</div><div class="l">Tidak Hadir</div></div>
+        <div class="card"><div class="n">${s.total_tamu||0}</div><div class="l">Total Tamu</div></div>
+        <div class="card"><div class="n">${w.total||0}</div><div class="l">Ucapan</div></div>`;
+
+      document.querySelector('#rsvp-table tbody').innerHTML = (r.rows||[]).map((x,i)=>`
+        <tr>
+          <td>${i+1}</td>
+          <td>${esc(x.nama)}</td>
+          <td><span class="tag ${x.kehadiran==='hadir'?'hadir':'tidak'}">${x.kehadiran==='hadir'?'Hadir':'Tidak Hadir'}</span></td>
+          <td>${x.jumlah_tamu}</td>
+          <td class="muted">${fmt(x.created_at)}</td>
+        </tr>`).join('') || '<tr><td colspan="5" class="muted">Belum ada data.</td></tr>';
+
+      document.querySelector('#wishes-table tbody').innerHTML = (w.rows||[]).map((x,i)=>`
+        <tr>
+          <td>${i+1}</td>
+          <td>${esc(x.nama)}</td>
+          <td>${esc(x.pesan)}</td>
+          <td class="muted">${fmt(x.created_at)}</td>
+        </tr>`).join('') || '<tr><td colspan="4" class="muted">Belum ada ucapan.</td></tr>';
+    }
+
+    function enter() {
+      if (pw.value === PASSWORD) {
+        gate.classList.add('hidden');
+        dash.classList.remove('hidden');
+        loadData();
+      } else {
+        document.getElementById('gate-msg').textContent = 'Kata sandi salah.';
+      }
+    }
+    document.getElementById('enter').addEventListener('click', enter);
+    pw.addEventListener('keydown', (e)=>{ if(e.key==='Enter') enter(); });
+    document.getElementById('refresh').addEventListener('click', loadData);
+  </script>
+</body>
+</html>
