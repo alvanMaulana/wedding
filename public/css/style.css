@@ -302,7 +302,7 @@ img { max-width: 100%; display: block; }
   font-size: 0.85rem; letter-spacing: 0.03em;
 }
 .person-ig:hover { color: var(--pink); }
-.couple-amp { font-family: var(--script); font-size: 3rem; color: var(--pink); line-height: 0.5; }
+.couple-amp { font-family: var(--script); font-size: 3rem; color: var(--text); line-height: 0.5; }
 
 /* ===== Save the date / countdown ===== */
 .save-date { background: linear-gradient(180deg, transparent, rgba(232,180,190,0.08), transparent); }
@@ -622,4 +622,52 @@ img { max-width: 100%; display: block; }
   .couple-amp { align-self: center; }
   .events { flex-direction: row; }
   .event-card { flex: 1; }
+}
+
+/* ===== Burung terbang (dekor) ===== */
+.birds-layer {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+  z-index: 4;
+}
+.bird {
+  position: absolute;
+  left: 0;
+  top: 0;
+  opacity: 0.5;
+  will-change: transform;
+  animation-name: fly-diag;
+  animation-timing-function: linear;
+  animation-iteration-count: 1;
+}
+.bird svg {
+  display: block;
+  width: var(--bird-size, 24px);
+  height: auto;
+  overflow: visible;
+}
+.bird .wing {
+  fill: none;
+  stroke: var(--text-2);
+  stroke-linecap: round;
+  transform-box: fill-box;
+}
+/* sayap jauh: pendek, menyusut, kepak kecil (perspektif) */
+.bird .wing.far  { stroke-width: 1.4; transform-origin: 100% 100%; animation: flap-far  var(--flap, .45s) ease-in-out infinite; }
+/* sayap dekat: panjang, kepak lebih lebar */
+.bird .wing.near { stroke-width: 1.9; transform-origin: 0% 100%;   animation: flap-near var(--flap, .45s) ease-in-out infinite; }
+
+@keyframes flap-far  { 0%, 100% { transform: rotate(0); } 50% { transform: rotate(-13deg); } }
+@keyframes flap-near { 0%, 100% { transform: rotate(0); } 50% { transform: rotate(28deg); } }
+
+/* meluncur mendatar naik landai (kiri -> kanan); --ox/--oy geser formasi */
+@keyframes fly-diag {
+  0%   { transform: translate(calc(-15vw + var(--ox, 0px)), calc(35vh + var(--oy, 0px))) rotate(var(--tilt, -8deg)); }
+  100% { transform: translate(calc(115vw + var(--ox, 0px)), calc(5vh + var(--oy, 0px))) rotate(var(--tilt, -8deg)); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .birds-layer { display: none; }
 }
