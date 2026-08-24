@@ -84,7 +84,7 @@ img { max-width: 100%; display: block; }
   padding: 2rem;
   background:
     linear-gradient(rgba(250,243,233,0.42), rgba(250,243,233,0.58)),
-    url('../assets/images/hero.jpg') center / cover no-repeat;
+    url('../assets/images/hero-2.png') center / cover no-repeat;
   overflow: hidden;
   transition: opacity 0.9s ease, visibility 0.9s ease;
 }
@@ -173,7 +173,7 @@ img { max-width: 100%; display: block; }
   text-transform: uppercase;
   font-size: 0.72rem;
   color: rgba(22,50,79,0.85);
-  margin-bottom: 0.6rem;
+  margin-bottom: 1.6rem;
 }
 .cover-names {
   font-family: var(--script);
@@ -183,7 +183,21 @@ img { max-width: 100%; display: block; }
   line-height: 1;
   margin-bottom: 2rem;
 }
-.cover-names span { color: var(--navy); }
+.cover-names .amp { color: var(--navy); font-size: 0.5em; }
+/* Mobile: nama zigzag (huruf Z) — Indy kiri, & tengah, Alvan kanan */
+@media (max-width: 480px) {
+  .cover-names {
+    /* display: flex; */
+    /* flex-direction: column; */
+    line-height: 1;
+    gap: 0.2em;
+    padding-inline: 1rem;
+    margin-bottom: 2.6rem;
+  }
+  .cover-names .n1 { align-self: flex-start; }
+  .cover-names .amp { align-self: center; margin: 0.1em 0; }
+  .cover-names .n2 { align-self: flex-end; }
+}
 .cover-to { margin-bottom: 2rem; }
 .cover-to-label { font-size: 0.75rem; color: rgba(22,50,79,0.75); letter-spacing: 0.04em; }
 .cover-to-name {
@@ -345,18 +359,52 @@ img { max-width: 100%; display: block; }
 .location-card h4 { font-family: var(--serif); font-size: 1.5rem; color: var(--text); font-weight: 600; margin-bottom: 0.6rem; }
 .location-card p { color: var(--text-2); margin-bottom: 1.4rem; font-size: 0.92rem; }
 
-/* ===== Gallery ===== */
-.gallery-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.6rem; }
-.gallery-item {
-  aspect-ratio: 1;
-  border-radius: 10px;
-  cursor: pointer;
-  overflow: hidden;
-  background: var(--cream-2) center / cover no-repeat;
-  transition: transform 0.25s ease;
+/* ===== Gallery (carousel 1 foto, swipe + auto-slide) ===== */
+.gallery-grid {
+  display: flex;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  scroll-behavior: smooth;            /* halusin jump dari dot/keyboard */
+  border-radius: 14px;
+  scrollbar-width: none;              /* Firefox */
+  -webkit-overflow-scrolling: touch;
 }
-.gallery-item:hover { transform: scale(1.04); }
+.gallery-grid::-webkit-scrollbar { display: none; }  /* WebKit */
+.gallery-item {
+  flex: 0 0 100%;
+  scroll-snap-align: center;
+  aspect-ratio: 4 / 5;
+  overflow: hidden;
+  background: var(--cream-2);
+}
+.gallery-item img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
 .gallery-item::after { font-size: 0; }
+.gallery-dots {
+  display: flex;
+  justify-content: center;
+  gap: 0.5rem;
+  margin-top: 1rem;
+}
+.gallery-dots button {
+  width: 8px;
+  height: 8px;
+  padding: 0;
+  border: 1px solid var(--gold);
+  border-radius: 50%;
+  background: transparent;
+  cursor: pointer;
+  transition: width 0.35s ease, background 0.35s ease;
+}
+.gallery-dots button.active {
+  width: 22px;
+  border-radius: 4px;
+  background: var(--gold);
+}
 
 /* ===== Gift ===== */
 .gift-intro { color: var(--text-2); max-width: 30rem; margin: 0 auto 1.6rem; font-size: 0.92rem; }
@@ -365,7 +413,7 @@ img { max-width: 100%; display: block; }
   border: 1px solid rgba(201,168,118,0.4);
   border-radius: 18px;
   padding: 1.8rem;
-  max-width: 22rem; margin: 0 auto;
+  max-width: 22rem; margin: 0 auto 1.2rem;
   box-shadow: var(--shadow);
   display: flex; flex-direction: column; align-items: center; gap: 0.4rem;
 }
@@ -488,47 +536,84 @@ img { max-width: 100%; display: block; }
   * { scroll-behavior: auto; }
 }
 
-/* ===== Floral side decorations (hero + section 4+) ===== */
-/* 1 pseudo full-section, banyak layer background (2 bouquet + 1 sprig botanik) di pinggir,
-   di BELAKANG konten. overflow:hidden cegah scroll horizontal; konten diangkat z-index 1.
-   Geometri seragam, gambar beda-beda per section. */
+/* ===== Floral side decorations ===== */
+/* SATU bunga per section, nempel pinggir bawah (bukan ke tengah), di BELAKANG konten.
+   Gambar + sisi divariasi per-section via aturan #id di bawah — sengaja TAK simetris.
+   overflow:hidden cegah scroll horizontal; konten diangkat z-index 1. */
 .section--floral { position: relative; overflow: hidden; }
 .section--floral > * { position: relative; z-index: 1; }
+
 .section--floral::before {
   content: "";
   position: absolute;
-  inset: 0;
+  bottom: -1.5rem;                  /* tangkai turun keluar layar bawah */
+  left: -3.5rem;                    /* default kiri, pangkal keluar tepi kiri */
   z-index: 0;
   pointer-events: none;
-  opacity: 0.5;
-  background-repeat: no-repeat, no-repeat, no-repeat;
-  background-position:
-    left -2.5rem bottom -1.5rem,   /* bouquet kiri-bawah */
-    right -2.5rem top 1rem,        /* bouquet kanan-atas */
-    right -1.2rem center;          /* sprig kanan-tengah */
-  background-size: 250px auto, 215px auto, auto 170px;
+  width: min(175px, 30vw);
+  height: min(360px, 60vw);         /* box tinggi; gambar contain, anchor bawah, sisa atas transparan */
+  background: url('../assets/images/flower-side.png') no-repeat center bottom;
+  background-size: contain;
+  transform-origin: 50% 100%;       /* poros di pangkal (di luar layar) = miring & goyang dari batang */
+  opacity: 0;                       /* muncul pas section masuk viewport */
+  transition: opacity 1.1s ease;
 }
 
-/* Tiap section: 2 bouquet + 1 sprig, kombinasi beda (path di-encode, nama file ada spasi) */
-#hero.section--floral::before      { background-image: url('../assets/images/flower/Asset%201flower.png'), url('../assets/images/flower/Asset%204flower.png'), url('../assets/images/flower/Asset%2025svg.png'); }
-#quote.section--floral::before     { background-image: url('../assets/images/flower/Asset%202flower.png'), url('../assets/images/flower/Asset%205flower.png'), url('../assets/images/flower/Asset%2028svg.png'); }
-#couple.section--floral::before    { background-image: url('../assets/images/flower/Asset%203flower.png'), url('../assets/images/flower/Asset%206flower.png'), url('../assets/images/flower/Asset%2026svg.png'); }
-#save-date.section--floral::before { background-image: url('../assets/images/flower/Asset%205flower.png'), url('../assets/images/flower/Asset%201flower.png'), url('../assets/images/flower/Asset%2027svg.png'); }
-#story.section--floral::before     { background-image: url('../assets/images/flower/Asset%206flower.png'), url('../assets/images/flower/Asset%202flower.png'), url('../assets/images/flower/Asset%2025svg.png'); }
-#location.section--floral::before  { background-image: url('../assets/images/flower/Asset%204flower.png'), url('../assets/images/flower/Asset%203flower.png'), url('../assets/images/flower/Asset%2028svg.png'); }
-#gift.section--floral::before      { background-image: url('../assets/images/flower/Asset%201flower.png'), url('../assets/images/flower/Asset%205flower.png'), url('../assets/images/flower/Asset%2026svg.png'); }
-#rsvp.section--floral::before      { background-image: url('../assets/images/flower/Asset%203flower.png'), url('../assets/images/flower/Asset%206flower.png'), url('../assets/images/flower/Asset%2027svg.png'); }
-#wishes.section--floral::before    { background-image: url('../assets/images/flower/Asset%202flower.png'), url('../assets/images/flower/Asset%204flower.png'), url('../assets/images/flower/Asset%2025svg.png'); }
+/* Fade-in + goyang halus saat section ke-observe (.floral-in dari main.js) */
+.section--floral.floral-in::before {
+  opacity: 0.3;
+  animation: floralSway 5s ease-in-out infinite alternate;
+}
+
+/* ---- Sisi KANAN (mirror): sebagian section digeser ke kanan + dibalik ---- */
+#hero.section--floral::before,
+#save-date.section--floral::before,
+#location.section--floral::before,
+#gift.section--floral::before,
+#wishes.section--floral::before { left: auto; right: -3.5rem; }
+
+#hero.section--floral.floral-in::before,
+#save-date.section--floral.floral-in::before,
+#location.section--floral.floral-in::before,
+#gift.section--floral.floral-in::before,
+#wishes.section--floral.floral-in::before {
+  animation-name: floralSwayFlip;
+  animation-duration: 4.3s;
+  animation-delay: 0.5s;
+}
+
+/* ---- Variasi bunga per section (hero/story/wishes pakai default lily) ---- */
+#quote.section--floral::before,
+#location.section--floral::before { background-image: url('../assets/images/flower-marigold.png'); }
+#couple.section--floral::before,
+#gift.section--floral::before { background-image: url('../assets/images/flower-calla.png'); }
+#save-date.section--floral::before,
+#rsvp.section--floral::before { background-image: url('../assets/images/flower-datura.png'); }
+
+/* Miring dasar ~7deg condong ke tengah + goyang halus ±2.5 di sekitarnya */
+@keyframes floralSway {            /* kiri: condong ke kanan (ke tengah) */
+  from { transform: rotate(4.5deg); }
+  to   { transform: rotate(9.5deg); }
+}
+/* Sisi kanan: mirror ikut dibawa ke keyframe (animation transform menimpa static transform).
+   scaleX(-1) membalik arah miring, jadi ikut condong ke tengah dari kanan. */
+@keyframes floralSwayFlip {
+  from { transform: scaleX(-1) rotate(4.5deg); }
+  to   { transform: scaleX(-1) rotate(9.5deg); }
+}
 
 @media (max-width: 480px) {
-  .section--floral::before {
-    opacity: 0.35;
-    background-position:
-      left -2rem bottom -1rem,
-      right -2rem top 0.5rem,
-      right -0.8rem center;
-    background-size: 150px auto, 130px auto, auto 105px;
-  }
+  .section--floral::before { width: min(115px, 30vw); height: min(240px, 62vw); left: -2.5rem; }
+  #hero.section--floral::before,
+  #save-date.section--floral::before,
+  #location.section--floral::before,
+  #gift.section--floral::before,
+  #wishes.section--floral::before { left: auto; right: -2.5rem; }
+  .section--floral.floral-in::before { opacity: 0.22; }
+}
+/* Hormati reduced-motion: tetap fade-in, tanpa goyang */
+@media (prefers-reduced-motion: reduce) {
+  .section--floral.floral-in::before { animation: none; }
 }
 
 /* ===== Desktop tweaks ===== */

@@ -3,9 +3,6 @@ const EVENT_DATE = new Date('2026-09-28T13:00:00+07:00'); // Akad, WIB
 const GALLERY_PHOTOS = [
   'assets/photos/IMG_0823.webp',
   'assets/photos/IMG_0825.webp',
-  'assets/photos/IMG_0840.webp',
-  'assets/photos/IMG_0844.webp',
-  'assets/photos/IMG_0845.webp',
   'assets/photos/IMG_0857.webp',
   'assets/photos/IMG_0910.webp',
 ];
@@ -61,48 +58,66 @@ const revealObserver = new IntersectionObserver((entries) => {
 }, { threshold: 0.12 });
 document.querySelectorAll('.reveal').forEach((el) => revealObserver.observe(el));
 
-/* ========= Gallery + lightbox ========= */
+/* Dekor floral: fade-in + mengambang saat section masuk viewport (sekali) */
+const floralObserver = new IntersectionObserver((entries) => {
+  entries.forEach((e) => {
+    if (e.isIntersecting) { e.target.classList.add('floral-in'); floralObserver.unobserve(e.target); }
+  });
+}, { threshold: 0.15 });
+document.querySelectorAll('.section--floral').forEach((el) => floralObserver.observe(el));
+
+/* ========= Gallery ========= */
 const galleryGrid = document.getElementById('gallery-grid');
 for (let i = 0; i < GALLERY_COUNT; i++) {
   const item = document.createElement('div');
   item.className = 'gallery-item';
-  item.style.backgroundImage = `url('${GALLERY_PHOTOS[i]}')`;
   item.dataset.index = i;
+  const img = document.createElement('img');
+  img.loading = 'lazy';           // native: cuma diload saat mendekati viewport
+  img.decoding = 'async';
+  img.src = GALLERY_PHOTOS[i];
+  img.alt = '';
+  item.appendChild(img);
   galleryGrid.appendChild(item);
 }
 
-const lb = document.getElementById('lightbox');
-const lbStage = document.getElementById('lb-stage');
-let lbIndex = 0;
-function renderLb() {
-  lbStage.style.backgroundImage = `url('${GALLERY_PHOTOS[lbIndex]}')`;
+/* Dots navigasi + auto-slide */
+const galleryDots = document.getElementById('gallery-dots');
+const dots = [];
+for (let i = 0; i < GALLERY_COUNT; i++) {
+  const dot = document.createElement('button');
+  dot.type = 'button';
+  dot.setAttribute('role', 'tab');
+  dot.setAttribute('aria-label', `Foto ${i + 1}`);
+  if (i === 0) dot.classList.add('active');
+  dot.addEventListener('click', () => goTo(i));
+  galleryDots.appendChild(dot);
+  dots.push(dot);
 }
-function openLb(i) {
-  lbIndex = i;
-  renderLb();
-  lb.hidden = false;
-  requestAnimationFrame(() => lb.classList.add('open'));
+function currentIndex() {
+  return Math.round(galleryGrid.scrollLeft / galleryGrid.clientWidth) % GALLERY_COUNT;
 }
-function closeLb() {
-  lb.classList.remove('open');
-  setTimeout(() => { lb.hidden = true; }, 300);
+function goTo(i) {
+  galleryGrid.scrollTo({ left: i * galleryGrid.clientWidth, behavior: 'smooth' });
 }
-function stepLb(dir) { lbIndex = (lbIndex + dir + GALLERY_COUNT) % GALLERY_COUNT; renderLb(); }
+function syncDots() {
+  const i = currentIndex();
+  dots.forEach((d, n) => d.classList.toggle('active', n === i));
+}
+let dotTick = false;
+galleryGrid.addEventListener('scroll', () => {
+  if (dotTick) return;
+  dotTick = true;
+  requestAnimationFrame(() => { syncDots(); dotTick = false; });
+}, { passive: true });
 
-galleryGrid.addEventListener('click', (e) => {
-  const item = e.target.closest('.gallery-item');
-  if (item) openLb(Number(item.dataset.index));
-});
-document.getElementById('lb-close').addEventListener('click', closeLb);
-document.getElementById('lb-prev').addEventListener('click', () => stepLb(-1));
-document.getElementById('lb-next').addEventListener('click', () => stepLb(1));
-lb.addEventListener('click', (e) => { if (e.target === lb) closeLb(); });
-document.addEventListener('keydown', (e) => {
-  if (lb.hidden) return;
-  if (e.key === 'Escape') closeLb();
-  if (e.key === 'ArrowLeft') stepLb(-1);
-  if (e.key === 'ArrowRight') stepLb(1);
-});
+const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+if (!reduceMotion) {
+  const start = () => setInterval(() => goTo((currentIndex() + 1) % GALLERY_COUNT), 3500);
+  let timer = start();
+  galleryGrid.addEventListener('pointerdown', () => clearInterval(timer));
+  galleryGrid.addEventListener('pointerup', () => { clearInterval(timer); timer = start(); });
+}
 
 /* ========= Copy to clipboard ========= */
 document.querySelectorAll('.btn-copy').forEach((btn) => {
@@ -200,7 +215,7 @@ function playSceneVideo() {
 function openInvitation() {
   openBtn.disabled = true;
   // mulai lagu dari detik 3 (sekali, pas metadata siap; pause/play berikutnya tak reset)
-  music.addEventListener('loadedmetadata', () => { music.currentTime = 3.5; }, { once: true });
+  music.addEventListener('loadedmetadata', () => { music.currentTime = 189.3; }, { once: true });
   setMusic(true);
   musicBtn.classList.add('show');
   revealContent();

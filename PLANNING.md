@@ -201,7 +201,7 @@ wedding-invitation/
 ### a. Data Mempelai
 
 **Mempelai Wanita**
-- Nama lengkap: Indy Vidha Fuadi
+- Nama lengkap: Indy Fidha Fuadi Wardatun
 - Nama panggilan: Indy
 - Anak ke- (dari berapa bersaudara): (belum ada info jumlah saudara)
 - Nama Ayah: Alm. Bapak Ranto
