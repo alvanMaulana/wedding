@@ -671,3 +671,49 @@ img { max-width: 100%; display: block; }
 @media (prefers-reduced-motion: reduce) {
   .birds-layer { display: none; }
 }
+
+/* ===== Loading screen ===== */
+body.preloading { overflow: hidden; height: 100vh; }
+.loader {
+  position: fixed; inset: 0; z-index: 300;
+  display: flex; align-items: center; justify-content: center; text-align: center;
+  padding: 2rem; background: var(--cream);
+  transition: opacity 0.7s ease, visibility 0.7s ease;
+}
+.loader.hidden { opacity: 0; visibility: hidden; pointer-events: none; }
+.loader-eyebrow {
+  font-family: var(--sans); letter-spacing: 0.35em; text-transform: uppercase;
+  font-size: 0.7rem; color: var(--text-2); margin-bottom: 0.8rem;
+}
+.loader-names {
+  font-family: var(--script); font-weight: 400;
+  font-size: clamp(2.6rem, 12vw, 4rem); color: var(--navy); line-height: 1;
+}
+.loader-names span { color: var(--gold); }
+.loader-spinner {
+  width: 42px; height: 42px; margin: 1.8rem auto 0.9rem;
+  border: 2px solid rgba(201,168,118,0.25); border-top-color: var(--gold);
+  border-radius: 50%; animation: spin 0.9s linear infinite;
+}
+.loader-hint { font-family: var(--serif); font-size: 0.95rem; color: var(--text-2); letter-spacing: 0.08em; }
+@media (prefers-reduced-motion: reduce) { .loader-spinner { animation: none; } }
+
+/* ===== Hero note (disclaimer nama/gelar) ===== */
+.hero-note {
+  color: var(--text-2); font-style: italic; font-size: 0.82rem;
+  max-width: 26rem; margin: 0.8rem auto 0;
+}
+
+/* ===== Dresscode ===== */
+.dresscode-intro { color: var(--text-2); max-width: 30rem; margin: 0 auto 1.8rem; font-size: 0.92rem; }
+.dresscode-swatches { display: flex; justify-content: center; gap: 1.6rem; flex-wrap: wrap; }
+.swatch { display: flex; flex-direction: column; align-items: center; gap: 0.6rem; }
+.swatch-dot {
+  width: 64px; height: 64px; border-radius: 50%;
+  border: 3px solid var(--white-soft);
+  box-shadow: var(--shadow), 0 0 0 1.5px var(--gold);
+}
+.swatch-name {
+  font-family: var(--serif); font-size: 1.05rem; color: var(--text);
+  letter-spacing: 0.06em;
+}

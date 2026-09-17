@@ -147,6 +147,13 @@ function setMusic(on) {
 }
 musicBtn.addEventListener('click', () => setMusic(!musicOn));
 
+/* Auto-stop musik saat pindah tab / keluar browser; lanjut saat kembali kalau tadinya nyala */
+document.addEventListener('visibilitychange', () => {
+  if (document.hidden) music.pause();
+  else if (musicOn) music.play().catch(() => {});
+});
+window.addEventListener('pagehide', () => music.pause());
+
 /* ========= Opening animation ========= */
 const cover = document.getElementById('cover');
 const content = document.getElementById('content');
@@ -222,3 +229,38 @@ function openInvitation() {
   playSceneVideo();
 }
 openBtn.addEventListener('click', openInvitation);
+
+/* ========= Loading screen ========= */
+/* Sembunyikan loader saat aset inti siap: window load (gambar + CSS bg) + video + musik.
+   ponytail: hard cap 12s biar aset yang macet tak menjebak user. */
+(function () {
+  const loader = document.getElementById('loader');
+  if (!loader) return;
+  let done = false;
+  const hide = () => {
+    if (done) return;
+    done = true;
+    loader.classList.add('hidden');
+    document.body.classList.remove('preloading');
+  };
+
+  const settle = (el) => new Promise((res) => {
+    if (!el) return res();
+    el.preload = 'auto';
+    el.addEventListener('canplaythrough', res, { once: true });
+    el.addEventListener('error', res, { once: true });
+    el.load();
+  });
+
+  const loaded = document.readyState === 'complete'
+    ? Promise.resolve()
+    : new Promise((res) => window.addEventListener('load', res, { once: true }));
+
+  Promise.all([
+    loaded,
+    settle(document.querySelector('.scene-video')),
+    settle(document.getElementById('bg-music')),
+  ]).then(hide);
+
+  setTimeout(hide, 12000);
+})();

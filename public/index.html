@@ -17,7 +17,17 @@
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400&family=Great+Vibes&family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="css/style.css" />
 </head>
-<body class="locked">
+<body class="locked preloading">
+
+  <!-- ===== LOADING SCREEN (tampil sampai semua aset siap) ===== -->
+  <div id="loader" class="loader" role="status" aria-live="polite" aria-label="Memuat undangan">
+    <div class="loader-inner">
+      <p class="loader-eyebrow">The Wedding Of</p>
+      <h1 class="loader-names">Indy <span>&amp;</span> Alvan</h1>
+      <div class="loader-spinner" aria-hidden="true"></div>
+      <p class="loader-hint">Memuat undangan&hellip;</p>
+    </div>
+  </div>
 
   <!-- ===== BACKGROUND MUSIC ===== -->
   <audio id="bg-music" loop preload="none">
@@ -53,7 +63,7 @@
 
       <div class="scene-names" aria-hidden="true">
         <p class="scene-names-eyebrow">The Wedding Of</p>
-        <h2 class="scene-names-title">Indy Fidha Fuadi<span>&amp;</span>Alvan Maulana</h2>
+        <h2 class="scene-names-title">Indy Fidha F.W.<span>&amp;</span>Alvan Maulana</h2>
         <p class="scene-names-date">28 September 2026</p>
       </div>
 
@@ -91,6 +101,7 @@
       <p class="hero-eyebrow reveal">Bismillahirrahmanirrahim</p>
       <h2 class="hero-names reveal">Indy &amp; Alvan</h2>
       <p class="hero-sub reveal">Dengan penuh kebahagiaan, kami mengundang anda untuk hadir dan menjadi bagian dari momen spesial pernikahan kami.</p>
+      <p class="hero-note reveal">Mohon maaf apabila terdapat kesalahan penulisan nama atau gelar.</p>
       <img class="divider reveal" src="assets/images/divider.svg" alt="" />
     </section>
 
@@ -192,6 +203,27 @@
         <h4>Waroeng Tani &mdash; Pan Java Mulyoagung</h4>
         <p>Jl. TPST, Jetak Lor, Mulyoagung, Kec. Dau, Kabupaten Malang, Jawa Timur 65151</p>
         <a class="btn btn-outline" href="https://www.google.com/maps/search/?api=1&query=Waroeng+Tani+Pan+Java+Mulyoagung+Dau+Malang" target="_blank" rel="noopener">&#128205; Buka Google Maps</a>
+      </div>
+    </section>
+
+    <!-- DRESSCODE -->
+    <section class="section dresscode section--floral" id="dresscode">
+      <h3 class="section-title reveal">Dresscode</h3>
+      <img class="divider reveal" src="assets/images/divider.svg" alt="" />
+      <p class="dresscode-intro reveal">Dengan hormat, kami mengundang Anda untuk mengenakan busana dengan nuansa warna:</p>
+      <div class="dresscode-swatches reveal">
+        <div class="swatch">
+          <span class="swatch-dot" style="background:#16324f"></span>
+          <span class="swatch-name">Navy</span>
+        </div>
+        <div class="swatch">
+          <span class="swatch-dot" style="background:#F0DFC0"></span>
+          <span class="swatch-name">Champagne</span>
+        </div>
+        <div class="swatch">
+          <span class="swatch-dot" style="background:#FAF3E9"></span>
+          <span class="swatch-name">Cream</span>
+        </div>
       </div>
     </section>
 
