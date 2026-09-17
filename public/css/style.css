@@ -716,10 +716,12 @@ body.preloading { overflow: hidden; height: 100vh; }
   .ld-heart { opacity: 0.8; }
 }
 
-/* ===== Cover note (disclaimer nama/gelar) ===== */
+/* ===== Cover note (disclaimer nama/gelar) — di dasar section cover ===== */
 .cover-note {
-  margin-top: 1.4rem; font-size: 0.8rem; font-style: italic;
-  color: rgba(22,50,79,0.8); max-width: 24rem; margin-left: auto; margin-right: auto;
+  position: absolute; left: 50%; bottom: 1.4rem; transform: translateX(-50%);
+  z-index: 4; width: calc(100% - 3rem); max-width: 28rem;
+  font-size: 0.78rem; font-style: italic; text-align: center;
+  color: rgba(22,50,79,0.8); text-shadow: 0 2px 12px rgba(255,255,255,0.55);
 }
 
 /* ===== Dresscode ===== */
