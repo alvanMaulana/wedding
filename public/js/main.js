@@ -182,36 +182,6 @@ function revealContent() {
   window.scrollTo(0, 0);
 }
 
-// Idle wobble setelah intro: pohon & bunga bergerak lembut, bulan mengambang.
-function playSceneIdle() {
-  if (!window.gsap) return;
-  gsap.to('.scene-tree',   { rotation: '+=1.5', y: '-=6', transformOrigin: 'bottom center',
-    duration: 2.6, ease: 'sine.inOut', yoyo: true, repeat: -1, stagger: 0.3 });
-  gsap.to('.scene-flower', { y: '-=8', duration: 2.0, ease: 'sine.inOut', yoyo: true, repeat: -1, stagger: 0.2 });
-  gsap.to('.scene-moon',   { y: '+=6', duration: 3.2, ease: 'sine.inOut', yoyo: true, repeat: -1 });
-}
-
-// Koreografi masuk scene (section 2). Reveal only; lanjut ke section 3 lewat scroll.
-function playSceneIntro() {
-  const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-  if (!window.gsap || reduced) return; // aset tampil statis di posisi CSS
-
-  gsap.timeline({ onComplete: playSceneIdle })
-    // 1) zoom out background gunung
-    .from('.scene-bg', { scale: 1.2, duration: 1.6, ease: 'power2.out' }, 0)
-    // 2) bulan turun sambil berputar dari atas
-    .from('.scene-moon', { y: '-60vh', rotation: -220, opacity: 0, duration: 1.6, ease: 'power2.out' }, 0.3)
-    // 3) pohon masuk dari samping + drift 45° ke atas (x luar + y bawah -> naik-menyerong)
-    .from('.tree-l1', { x: '-45vw', y: '22vh', opacity: 0, duration: 1.4, ease: 'power2.out' }, 0.3)
-    .from('.tree-l2', { x: '-60vw', y: '26vh', opacity: 0, duration: 1.5, ease: 'power2.out' }, 0.45)
-    .from('.tree-r1', { x: '45vw',  y: '22vh', opacity: 0, duration: 1.4, ease: 'power2.out' }, 0.35)
-    // 4) bunga muncul dari bawah, stagger (variasi warna dari aset)
-    .from('.scene-flower', { y: '35vh', opacity: 0, duration: 1.1, stagger: 0.15, ease: 'back.out(1.5)' }, 0.6)
-    // 5) penjor masuk terakhir dari kiri & kanan
-    .from('.penjor-left',  { x: '-60vw', opacity: 0, duration: 1.0, ease: 'power3.out' }, '>-0.15')
-    .from('.penjor-right', { x: '60vw',  opacity: 0, duration: 1.0, ease: 'power3.out' }, '<');
-}
-
 // Section 2 video: putar after-hero.mp4, nama pengantin fade-in setelah 18 detik.
 function playSceneVideo() {
   const video = document.querySelector('.scene-video');

@@ -135,37 +135,6 @@ img { max-width: 100%; display: block; }
   50%      { transform: translateX(-50%) translateY(7px) rotate(45deg); opacity: 1; }
 }
 
-/* Background gunung (tanpa bulan) — layer paling belakang */
-.scene-bg { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; z-index: 1; }
-
-/* Bulan — wrapper untuk centering, GSAP animasikan img (rotasi + turun) */
-.scene-moon-wrap { position: absolute; top: 0; left: 0; width: 100%; display: flex; justify-content: center; z-index: 2; pointer-events: none; }
-.scene-moon { margin-top: 6vh; width: min(150px, 32vw); height: auto; }
-
-/* Pohon (tema Jawa) — anchor ke sisi, masuk dari samping */
-.scene-tree { position: absolute; z-index: 3; height: min(46vh, 420px); width: auto; }
-.tree-l1 { left: -2%;  bottom: 8vh; }
-.tree-l2 { left: 8%;   bottom: 22vh; height: min(34vh, 300px); }
-.tree-r1 { right: -2%; bottom: 6vh; }
-
-/* Bunga (variasi warna) — deret bawah, muncul dari bawah */
-.scene-flower { position: absolute; z-index: 4; height: min(20vh, 170px); width: auto; }
-.fl-1 { left: 10%; bottom: -1vh; }
-.fl-2 { left: 44%; bottom: -3vh; height: min(24vh, 200px); }
-.fl-3 { right: 12%; bottom: -1vh; }
-
-/* Penjor kiri & kanan — pilar tinggi, masuk terakhir */
-.scene-penjor { position: absolute; bottom: 0; z-index: 5; height: min(88vh, 780px); width: auto; }
-.penjor-left { left: 0; }
-.penjor-right { right: 0; }
-
-@media (max-width: 480px) {
-  .scene-tree { height: min(34vh, 280px); }
-  .tree-l2 { height: min(26vh, 210px); }
-  .scene-flower { height: min(15vh, 120px); }
-  .scene-penjor { height: min(70vh, 520px); }
-}
-
 .cover-inner { position: relative; z-index: 4; max-width: 480px; text-shadow: 0 2px 16px rgba(255,255,255,0.5); }
 .cover-eyebrow {
   font-family: var(--sans);
