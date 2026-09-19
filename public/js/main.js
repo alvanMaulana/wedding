@@ -27,6 +27,20 @@ function getGuestName() {
 window.guestName = getGuestName;
 document.getElementById('cover-guest').textContent = getGuestName();
 
+/* ========= Catat siapa buka undangan (?to=Nama) ========= */
+// upsert onConflict nama + ignoreDuplicates = INSERT ... ON CONFLICT DO NOTHING.
+// nama udah ada di DB -> di-skip. localStorage cegah hit ulang tiap reload browser sama.
+async function logVisit(nama) {
+  if (!window.sb || nama === 'Tamu Undangan') return;
+  try { if (localStorage.getItem('visit_logged') === nama) return; } catch {}
+  try {
+    const { error } = await sb.from('visits').upsert({ nama: nama.slice(0, 100) }, { onConflict: 'nama', ignoreDuplicates: true });
+    if (error) throw error;
+    try { localStorage.setItem('visit_logged', nama); } catch {}
+  } catch {}
+}
+logVisit(getGuestName());
+
 /* ========= Countdown ========= */
 function pad(n) { return String(n).padStart(2, '0'); }
 function tickCountdown() {
@@ -221,8 +235,11 @@ function playSceneVideo() {
 
 function openInvitation() {
   openBtn.disabled = true;
-  // mulai lagu dari detik 3 (sekali, pas metadata siap; pause/play berikutnya tak reset)
-  music.addEventListener('loadedmetadata', () => { music.currentTime = 189.3; }, { once: true });
+  // mulai lagu dari 2:30, SEBELUM play (biar tak loncat). Metadata mungkin sudah
+  // dimuat loader (settle), jadi jangan cuma gantung event: cek readyState dulu.
+  const seekStart = () => { music.currentTime = 189.3; };
+  if (music.readyState >= 1) seekStart();
+  else music.addEventListener('loadedmetadata', seekStart, { once: true });
   setMusic(true);
   musicBtn.classList.add('show');
   revealContent();

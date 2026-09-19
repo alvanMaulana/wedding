@@ -31,6 +31,8 @@
     .hidden { display: none; }
     .topbar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem; }
   </style>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="js/config.js"></script>
 </head>
 <body>
   <!-- Gate -->
@@ -66,54 +68,84 @@
         <tbody></tbody>
       </table>
     </div>
+
+    <h2>Link Dibuka</h2>
+    <div class="table-scroll">
+      <table id="visits-table">
+        <thead><tr><th>#</th><th>Nama</th><th>Pertama Buka</th></tr></thead>
+        <tbody></tbody>
+      </table>
+    </div>
   </div>
 
   <script>
-    // ponytail: client-side password gate only (versi awal). Ganti ke auth server jika data sensitif.
+    // ponytail: client-side password gate only — kosmetik. Anon key publik + RLS select policy
+    // = daftar RSVP kebaca siapa pun yang pegang key. Gate cuma nyegah buka /admin.html iseng.
+    // Ganti ke Supabase Auth kalau daftar tamu harus benar-benar privat.
     const PASSWORD = 'indyalvan2026';
+    const SESSION_KEY = 'admin_ok';
 
     const gate = document.getElementById('gate');
     const dash = document.getElementById('dash');
     const pw = document.getElementById('pw');
 
     function esc(s){ const d=document.createElement('div'); d.textContent=s; return d.innerHTML; }
-    function fmt(iso){ const d=new Date(iso.replace(' ','T')+'Z'); return d.toLocaleString('id-ID',{dateStyle:'medium',timeStyle:'short'}); }
+    function fmt(iso){ return new Date(iso).toLocaleString('id-ID',{dateStyle:'medium',timeStyle:'short'}); }
 
     async function loadData() {
-      const [rRes, wRes] = await Promise.all([fetch('/api/rsvp'), fetch('/api/wishes?limit=200')]);
-      const r = await rRes.json();
-      const w = await wRes.json();
+      const [rRes, wRes, vRes] = await Promise.all([
+        sb.from('rsvp').select('nama, kehadiran, jumlah_tamu, created_at').order('created_at', { ascending: false }),
+        sb.from('wishes').select('nama, pesan, created_at').order('created_at', { ascending: false }).limit(200),
+        sb.from('visits').select('nama, first_opened').order('first_opened', { ascending: false }),
+      ]);
+      const rows = rRes.data || [];
+      const wishes = wRes.data || [];
+      const visits = vRes.data || [];
 
-      const s = r.summary || {};
+      const hadirRows = rows.filter((x) => x.kehadiran === 'hadir');
+      const totalTamu = hadirRows.reduce((sum, x) => sum + (x.jumlah_tamu || 0), 0);
       document.getElementById('summary').innerHTML = `
-        <div class="card"><div class="n">${s.hadir||0}</div><div class="l">Hadir</div></div>
-        <div class="card"><div class="n">${s.tidak_hadir||0}</div><div class="l">Tidak Hadir</div></div>
-        <div class="card"><div class="n">${s.total_tamu||0}</div><div class="l">Total Tamu</div></div>
-        <div class="card"><div class="n">${w.total||0}</div><div class="l">Ucapan</div></div>`;
+        <div class="card"><div class="n">${hadirRows.length}</div><div class="l">Hadir</div></div>
+        <div class="card"><div class="n">${rows.length - hadirRows.length}</div><div class="l">Tidak Hadir</div></div>
+        <div class="card"><div class="n">${totalTamu}</div><div class="l">Total Tamu</div></div>
+        <div class="card"><div class="n">${wishes.length}</div><div class="l">Ucapan</div></div>
+        <div class="card"><div class="n">${visits.length}</div><div class="l">Link Dibuka</div></div>`;
 
-      document.querySelector('#rsvp-table tbody').innerHTML = (r.rows||[]).map((x,i)=>`
+      document.querySelector('#rsvp-table tbody').innerHTML = rows.map((x,i)=>`
         <tr>
           <td>${i+1}</td>
           <td>${esc(x.nama)}</td>
           <td><span class="tag ${x.kehadiran==='hadir'?'hadir':'tidak'}">${x.kehadiran==='hadir'?'Hadir':'Tidak Hadir'}</span></td>
           <td>${x.jumlah_tamu}</td>
           <td class="muted">${fmt(x.created_at)}</td>
-        </tr>`).join('') || '<tr><td colspan="5" class="muted">Belum ada data.</td></tr>';
+        </tr>`).join('') || '<tr><td colspan="5" class="muted">Belum ada data (atau RLS blok select rsvp).</td></tr>';
 
-      document.querySelector('#wishes-table tbody').innerHTML = (w.rows||[]).map((x,i)=>`
+      document.querySelector('#wishes-table tbody').innerHTML = wishes.map((x,i)=>`
         <tr>
           <td>${i+1}</td>
           <td>${esc(x.nama)}</td>
           <td>${esc(x.pesan)}</td>
           <td class="muted">${fmt(x.created_at)}</td>
         </tr>`).join('') || '<tr><td colspan="4" class="muted">Belum ada ucapan.</td></tr>';
+
+      document.querySelector('#visits-table tbody').innerHTML = visits.map((x,i)=>`
+        <tr>
+          <td>${i+1}</td>
+          <td>${esc(x.nama)}</td>
+          <td class="muted">${fmt(x.first_opened)}</td>
+        </tr>`).join('') || '<tr><td colspan="3" class="muted">Belum ada yang buka (atau RLS blok select visits).</td></tr>';
+    }
+
+    function openDash() {
+      gate.classList.add('hidden');
+      dash.classList.remove('hidden');
+      loadData();
     }
 
     function enter() {
       if (pw.value === PASSWORD) {
-        gate.classList.add('hidden');
-        dash.classList.remove('hidden');
-        loadData();
+        try { localStorage.setItem(SESSION_KEY, '1'); } catch {}
+        openDash();
       } else {
         document.getElementById('gate-msg').textContent = 'Kata sandi salah.';
       }
@@ -121,6 +153,11 @@
     document.getElementById('enter').addEventListener('click', enter);
     pw.addEventListener('keydown', (e)=>{ if(e.key==='Enter') enter(); });
     document.getElementById('refresh').addEventListener('click', loadData);
+
+    // Session tersimpan: skip gate kalau sudah pernah login
+    let logged = false;
+    try { logged = localStorage.getItem(SESSION_KEY) === '1'; } catch {}
+    if (logged) openDash();
   </script>
 </body>
 </html>
